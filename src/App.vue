@@ -15,7 +15,10 @@ export default {
     Header,
     Conteudo
   },
-  methods: {}
+  methods: {},
+  mounted() {
+    console.log(this.$firebase);
+  }
 };
 </script>
 
