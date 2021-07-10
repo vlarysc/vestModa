@@ -1,11 +1,11 @@
 <template>
   <div class="row">
-    <div class="col-md-3 col-sm-6">
+    <div v-for="(produto, i) in vestModa" :key="i" class="col-md-3 col-sm-6">
       <div class="product-grid">
         <div class="product-image">
           <a href="#" class="image">
-            <img class="pic-1" src="../assets/1.jpg" />
-            <img class="pic-2" src="../assets/1.jpg" />
+            <img class="pic-1" :src="produto.foto" />
+            <img class="pic-2" :src="produto.foto" />
           </a>
           <a href="" class="product-like-icon"><i class="far fa-heart"></i></a>
           <ul class="product-links">
@@ -24,95 +24,10 @@
           </ul>
         </div>
         <div class="product-content">
-          <h3 class="title"><a href="#">Biquini</a></h3>
-          <div class="price">$66.90</div>
-        </div>
-      </div>
-    </div>
-    <div class="col-md-3 col-sm-6">
-      <div class="product-grid">
-        <div class="product-image">
-          <a href="#" class="image">
-            <img class="pic-1" src="../assets/2.jpg" />
-            <img class="pic-2" src="../assets/2.jpg" />
-          </a>
-          <a href="" class="product-like-icon"><i class="far fa-heart"></i></a>
-          <ul class="product-links">
-            <li>
-              <a href="#"><i class="far fa-heart"></i></a>
-            </li>
-            <li>
-              <a href="#"><i class="fa fa-random"></i></a>
-            </li>
-            <li>
-              <a href="#"><i class="fa fa-eye"></i></a>
-            </li>
-            <li>
-              <a href="#"><i class="fa fa-shopping-cart"></i></a>
-            </li>
-          </ul>
-        </div>
-        <div class="product-content">
-          <h3 class="title"><a href="#">Maiô</a></h3>
-          <div class="price">$78.80</div>
-        </div>
-      </div>
-    </div>
-    <div class="col-md-3 col-sm-6">
-      <div class="product-grid">
-        <div class="product-image">
-          <a href="#" class="image">
-            <img class="pic-1" src="../assets/3.jpg" />
-            <img class="pic-2" src="../assets/3.jpg" />
-          </a>
-          <a href="" class="product-like-icon"><i class="far fa-heart"></i></a>
-          <ul class="product-links">
-            <li>
-              <a href="#"><i class="far fa-heart"></i></a>
-            </li>
-            <li>
-              <a href="#"><i class="fa fa-random"></i></a>
-            </li>
-            <li>
-              <a href="#"><i class="fa fa-eye"></i></a>
-            </li>
-            <li>
-              <a href="#"><i class="fa fa-shopping-cart"></i></a>
-            </li>
-          </ul>
-        </div>
-        <div class="product-content">
-          <h3 class="title"><a href="#">Maiô</a></h3>
-          <div class="price">$78.80</div>
-        </div>
-      </div>
-    </div>
-    <div class="col-md-3 col-sm-6">
-      <div class="product-grid">
-        <div class="product-image">
-          <a href="#" class="image">
-            <img class="pic-1" src="../assets/4.jpg" />
-            <img class="pic-2" src="../assets/2.jpg" />
-          </a>
-          <a href="" class="product-like-icon"><i class="far fa-heart"></i></a>
-          <ul class="product-links">
-            <li>
-              <a href="#"><i class="far fa-heart"></i></a>
-            </li>
-            <li>
-              <a href="#"><i class="fa fa-random"></i></a>
-            </li>
-            <li>
-              <a href="#"><i class="fa fa-eye"></i></a>
-            </li>
-            <li>
-              <a href="#"><i class="fa fa-shopping-cart"></i></a>
-            </li>
-          </ul>
-        </div>
-        <div class="product-content">
-          <h3 class="title"><a href="#">Maiô</a></h3>
-          <div class="price">$78.80</div>
+          <h3 class="title">
+            <a href="#">{{ produto.produto }}</a>
+          </h3>
+          <div class="price">{{ produto.preco }}</div>
         </div>
       </div>
     </div>
@@ -121,7 +36,79 @@
 </template>
 
 <script>
-export default {};
+import groupBy from "lodash.groupby";
+import moment from "moment";
+
+export default {
+  name: "Home",
+  data() {
+    return {
+      vestModa: []
+    };
+  },
+  mounted() {
+    console.log("ops", this.vestModa);
+  },
+  computed: {
+    grupoMeses() {
+      let grupoMeses = [];
+
+      const mesAtual = () => {
+        grupoMeses.push({
+          data: [],
+          total: 0,
+          mes: moment().format("MM/YYYY")
+        });
+      };
+
+      if (this.vestModa.length) {
+        const meses = groupBy(this.vestModa, (i) => {
+          return moment(i.createdAt).format("MM/YYYY");
+        });
+
+        const sortMes = Object.keys(meses).sort((a, b) => {
+          if (moment(`${a} 01`, "MM/YYYY HH").isBefore(moment(`${b} 01`, "MM/YYYY HH"))) {
+            return -1;
+          } else {
+            return +1;
+          }
+        });
+
+        grupoMeses = sortMes.map((mes) => ({
+          mes,
+          data: meses[mes],
+          total: meses[mes].map((i) => +i.valor).reduce((a, c) => a + c, 0)
+        }));
+
+        const ultimoMes = moment(grupoMeses[grupoMeses.length - 1].mes, "MM/YYYY");
+
+        if (!ultimoMes.isSame(moment(), "mes")) {
+          mesAtual();
+        }
+      } else {
+        mesAtual();
+      }
+      return grupoMeses;
+    }
+  },
+  created() {
+    this.getDados();
+    console.log("hi", this.getDados());
+  },
+  methods: {
+    remover() {
+      console.log("Remover", this.$firebase);
+    },
+    getDados() {
+      const ref = this.$firebase.database().ref(`/${window.uid}`);
+      ref.on("value", (data) => {
+        const values = data.val();
+        this.vestModa = Object.keys(values).map((i) => values[i]);
+        console.log(ref);
+      });
+    }
+  }
+};
 </script>
 
 <style>
