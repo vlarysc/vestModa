@@ -1,5 +1,6 @@
 <template>
   <div class="row">
+    {{ produto }}
     <div v-for="(produto, i) in vestModa" :key="i" class="col-md-3 col-sm-6">
       <div class="product-grid">
         <div class="product-image">
@@ -38,6 +39,7 @@
 <script>
 import groupBy from "lodash.groupby";
 import moment from "moment";
+import { mapActions, mapState } from "vuex";
 
 export default {
   name: "Home",
@@ -46,10 +48,8 @@ export default {
       vestModa: []
     };
   },
-  mounted() {
-    console.log("ops", this.vestModa);
-  },
   computed: {
+    ...mapState({ produto: (state) => state.no_produto }),
     grupoMeses() {
       let grupoMeses = [];
 
@@ -92,20 +92,12 @@ export default {
     }
   },
   created() {
-    this.getDados();
-    console.log("hi", this.getDados());
+    console.log("oiii", this.getDados());
   },
   methods: {
+    ...mapActions({ getDados: "getDados" }),
     remover() {
       console.log("Remover", this.$firebase);
-    },
-    getDados() {
-      const ref = this.$firebase.database().ref(`/${window.uid}`);
-      ref.on("value", (data) => {
-        const values = data.val();
-        this.vestModa = Object.keys(values).map((i) => values[i]);
-        console.log(ref);
-      });
     }
   }
 };
