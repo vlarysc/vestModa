@@ -51,44 +51,25 @@ export default {
   computed: {
     ...mapState({ produto: (state) => state.no_produto }),
     grupoMeses() {
-      let grupoMeses = [];
-
-      const mesAtual = () => {
-        grupoMeses.push({
-          data: [],
-          total: 0,
-          mes: moment().format("MM/YYYY")
-        });
-      };
-
-      if (this.vestModa.length) {
-        const meses = groupBy(this.vestModa, (i) => {
-          return moment(i.createdAt).format("MM/YYYY");
-        });
-
-        const sortMes = Object.keys(meses).sort((a, b) => {
-          if (moment(`${a} 01`, "MM/YYYY HH").isBefore(moment(`${b} 01`, "MM/YYYY HH"))) {
-            return -1;
-          } else {
-            return +1;
+      var div = document.getElementById("div");
+      var texto = "FELIZ NATAL!";
+      var escrevendo = true;
+      function escrever(str, el) {
+        var char = str.split("").reverse();
+        var typer = setInterval(function () {
+          if (escrevendo) {
+            if (!char.length) {
+              return clearInterval(typer);
+            }
+            var next = char.pop();
+            el.innerHTML += next;
+            if (el.innerHTML.length == str.length) {
+              escrevendo = false;
+            }
           }
-        });
-
-        grupoMeses = sortMes.map((mes) => ({
-          mes,
-          data: meses[mes],
-          total: meses[mes].map((i) => +i.valor).reduce((a, c) => a + c, 0)
-        }));
-
-        const ultimoMes = moment(grupoMeses[grupoMeses.length - 1].mes, "MM/YYYY");
-
-        if (!ultimoMes.isSame(moment(), "mes")) {
-          mesAtual();
-        }
-      } else {
-        mesAtual();
+        }, 100);
       }
-      return grupoMeses;
+      escrever(texto, div);
     }
   },
   created() {
@@ -97,7 +78,25 @@ export default {
   methods: {
     ...mapActions({ getDados: "getDados" }),
     remover() {
-      console.log("Remover", this.$firebase);
+      var div = document.getElementById("div");
+      var texto = "FELIZ NATAL!";
+      var escrevendo = true;
+      function escrever(str, el) {
+        var char = str.split("").reverse();
+        var typer = setInterval(function () {
+          if (escrevendo) {
+            if (!char.length) {
+              return clearInterval(typer);
+            }
+            var next = char.pop();
+            el.innerHTML += next;
+            if (el.innerHTML.length == str.length) {
+              escrevendo = false;
+            }
+          }
+        }, 100);
+      }
+      escrever(texto, div);
     }
   }
 };
